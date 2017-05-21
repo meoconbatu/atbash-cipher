@@ -6,39 +6,46 @@ import (
 
 const testVersion = 2
 
-var plain = "abcdefghijklmnopqrstuvwxyz"
-var cipher = "zyxwvutsrqponmlkjihgfedcba"
 var groupFixedLength = 5
-var punctuation = ' '
+var punctuation = " "
 
 func Atbash(input string) string {
-	output := make([]rune, 0)
 	input = strings.ToLower(input)
-	groupLength := 0
-	newCipher := rune(' ')
+	var group []string
+	s := make([]rune, groupFixedLength)
+	i := 0
 	for _, c := range input {
-		if (c < 'a' || c > 'z') && (c < '1' || c > '9') {
+		if !IsLetter(c) && !IsNumber(c) {
 			continue
 		}
-		newCipher = rune(' ')
-		if c >= '1' && c <= '9' {
-			newCipher = c
-		} else {
-			for j, p := range plain {
-				if p == c {
-					newCipher = rune(cipher[j])
-					break
-				}
-			}
-		}
-		if newCipher != ' ' {
-			groupLength++
-			if groupLength == groupFixedLength+1 {
-				output = append(output, punctuation)
-				groupLength = 1
-			}
-			output = append(output, newCipher)
+		s[i] = Transpose(c)
+		i++
+		if i == groupFixedLength {
+			group = append(group, string(s))
+			i = 0
 		}
 	}
-	return string(output)
+	if i > 0 {
+		group = append(group, string(s[0:i]))
+	}
+	return strings.Join(group, punctuation)
+}
+func IsLetter(r rune) bool {
+	if r >= 'a' && r <= 'z' {
+		return true
+	}
+	return false
+}
+func IsNumber(r rune) bool {
+	if r >= '1' && r <= '9' {
+		return true
+	}
+	return false
+}
+func Transpose(r rune) rune {
+	if IsNumber(r) {
+		return r
+	}
+	return 219 - r
+
 }
